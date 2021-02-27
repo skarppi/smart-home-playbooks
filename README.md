@@ -4,7 +4,7 @@ Collection of Ansible and Arduino scripts for setting up Raspberry Pi as a weath
 
 # Components
 
-### boot
+## boot
 
 Example files to copy to Raspberry Pi's ```boot``` partition in order to activate wireless network and ssh on the first boot.
 
@@ -12,7 +12,7 @@ Find out the correct IP address e.g. using ```arp -a``` command on a Mac and ssh
 
 [More about setting up headless Raspberry Pi](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md)
 
-### Playbooks
+## Playbooks
 
 ```
 pip3 install ansible
@@ -30,13 +30,14 @@ Execute playbooks
 ```
 cd playbooks
 cp common.yml.{template,}
-ansible-playbook setup.yaml
+ansible-playbook setup.yml
 ```
 
-1. setup.yml 
+##### setup.yml 
 
 Basic setup of Raspberry Pi 4b.
 
-2. 4g.yaml
+##### 4g.yml
 
-Configure Huawei E392 4G dongle.
+Configure Huawei E392 4G dongle. ```inet_down.sh``` script tries to fix broken internet and/or reboot in case ifup/down didn't fix the connection.
+

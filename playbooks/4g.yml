@@ -1,0 +1,35 @@
+- name: Install Huawei E392 4G dongle
+  hosts: all
+  become: yes
+  tasks:
+  - apt: 
+      pkg:
+      - libqmi-utils
+      - usb-modeswitch
+      - usb-modeswitch-data
+  - ansible.builtin.copy:
+      src: "etc/usb_modeswitch.d/12d1:1505"
+      dest: "/etc/usb_modeswitch.d/12d1:1505"
+      owner: root
+      group: root
+  - ansible.builtin.copy:
+      src: "etc/qmi-network.conf"
+      dest: "/etc/qmi-network.conf"
+      owner: root
+      group: root
+  - ansible.builtin.copy:
+      src: "etc/network/interfaces.d/wwan0"
+      dest: "/etc/network/interfaces.d/"
+      owner: root
+      group: root
+  - ansible.builtin.copy:
+      src: "home/pi/inet_down.sh"
+      dest: /home/pi/
+      owner: pi
+      group: pi
+      mode: '755'
+  - ansible.builtin.cron:
+      name: inet_down
+      minute: "*/30"
+      user: pi
+      job: "/home/pi/inet_down.sh >> /home/pi/inet_down.log"
