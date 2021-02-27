@@ -1,0 +1,29 @@
+- name: setup raspberry pi 4b
+  hosts: all
+  become: yes
+  vars_files: common.yml 
+  tasks:
+  - ansible.builtin.shell: raspi-config nonint do_hostname {{hostname}}
+  - ansible.builtin.shell: raspi-config nonint do_i2c 0
+  - ansible.builtin.shell: raspi-config nonint do_change_timezone {{timezone}}
+  - ansible.builtin.shell: raspi-config nonint do_memory_split 256
+  - ansible.builtin.shell: raspi-config nonint do_expand_rootfs
+  - ansible.builtin.blockinfile:
+      path: /boot/config.txt
+      block: |
+        dtparam=i2c_arm_baudrate=400000
+      insertbefore: \[pi4\]
+  - ansible.builtin.copy:
+      src: home/pi/.vimrc
+      dest: /root/.vimrc
+      owner: root
+      group: root
+  - ansible.builtin.copy:
+      src: home/pi/.vimrc
+      dest: /home/pi
+      owner: pi
+      group: pi
+  - ansible.builtin.lineinfile:
+      path: /home/pi/.bashrc
+      regexp: "^#alias ll='ls -l'"
+      line: "alias ll='ls -la'"
