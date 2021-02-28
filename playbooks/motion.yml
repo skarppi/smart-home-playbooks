@@ -1,0 +1,50 @@
+- name: Install motion eye
+  hosts: all
+  vars_files: common.yml 
+  become: yes
+  tasks:
+  - ansible.builtin.shell: raspi-config nonint do_camera 0
+  - apt: 
+      pkg:
+      - ffmpeg
+      - libmariadb3
+      - libpq5
+      - libmicrohttpd12
+      - python-pip
+      - python-dev
+      - libssl-dev
+      - libcurl4-openssl-dev
+      - libjpeg-dev
+      - libz-dev
+      - python-pillow
+      - tree
+  - ansible.builtin.get_url:
+      url: https://github.com/Motion-Project/motion/releases/download/release-4.2.2/pi_buster_motion_4.2.2-1_armhf.deb
+      dest: /tmp/pi_buster_motion_4.2.2-1_armhf.deb
+  - apt:
+      deb: /tmp/pi_buster_motion_4.2.2-1_armhf.deb
+  - ansible.builtin.pip:
+      executable: /usr/bin/pip
+      name:
+      - motioneye
+  - name: Create motioneye var dir
+    ansible.builtin.file:
+      path: "/var/lib/motioneye"
+      state: directory
+  - ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: /etc/motioneye/
+      owner: root
+      group: root
+    with_fileglob:
+    - /etc/motioneye/*
+  - name: Copy init script
+    ansible.builtin.copy:
+      remote_src: yes
+      src: "/usr/local/share/motioneye/extra/motioneye.systemd-unit-local"
+      dest: "/etc/systemd/system/motioneye.service"
+      owner: root
+      group: root
+  - ansible.builtin.shell: systemctl daemon-reload
+  - ansible.builtin.shell: systemctl enable motioneye
+  - ansible.builtin.shell: systemctl start motioneye

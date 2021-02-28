@@ -60,6 +60,10 @@ but is accessible through Wireguard.
 
 Setup wireless access point required for wireless sensors (ESP8266 or similar).
 
+#### motion.yml
+
+Add Raspberry Pi HQ Camera as a security camera with Motion Eye.
+
 ## Arduino
 
 Sketch files below are for Wemos D1 Mini ESP8266 device. They connect to Raspberry Pi network, read measurements once per minute and send them as a MQTT message.
