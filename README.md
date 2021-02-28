@@ -59,3 +59,15 @@ but is accessible through Wireguard.
 #### router.yml
 
 Setup wireless access point required for wireless sensors (ESP8266 or similar).
+
+## Arduino
+
+Sketch files below are for Wemos D1 Mini ESP8266 device. They connect to Raspberry Pi network, read measurements once per minute and send them as a MQTT message.
+
+##### DS18B20
+
+Waterproof 1-Wire DS18B20 digital temperature sensor.
+
+##### VMA342
+
+Air quality sensor combo board with CCS811 and BME280 sensors.
