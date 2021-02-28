@@ -9,3 +9,6 @@ wg_privatekey: wg genkey
 wg_remote_publickey: wg pubkey < remote_privatekey
 wg_remote_endpoint: server:51820
 wg_ip_range: 192.168.100.100/24
+ufw_allow_from: 1.2.3.4
+wlan_ssid: ssid
+wlan_passphrase: password 

@@ -55,3 +55,7 @@ Establish Wireguard VPN tunnel to remote server. Raspberry Pi has no open ports 
 but is accessible through Wireguard.
 
 [WireGuard Site-to-Site](https://gist.github.com/insdavm/b1034635ab23b8839bf957aa406b5e39).
+
+#### router.yml
+
+Setup wireless access point required for wireless sensors (ESP8266 or similar).
