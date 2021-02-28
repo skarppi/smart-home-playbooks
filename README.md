@@ -48,3 +48,10 @@ Setup a MQTT broker which gathers all observations from wired sensors and other 
 Raspberry Pi is wired with BME280 temperature, humidity and pressure sensor. The sensor is read once per minute ```bme280mqtt.py``` and values are sent in a MQTT message.
 
 Outside temperature is polled using the [FMI Open data WFS service](https://en.ilmatieteenlaitos.fi/open-data-manual).
+
+##### wireguard.yml
+
+Establish Wireguard VPN tunnel to remote server. Raspberry Pi has no open ports to the world
+but is accessible through Wireguard.
+
+[WireGuard Site-to-Site](https://gist.github.com/insdavm/b1034635ab23b8839bf957aa406b5e39).

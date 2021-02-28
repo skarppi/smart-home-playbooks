@@ -5,3 +5,7 @@ mqtt_remote_username: username
 mqtt_remote_password: password
 mqtt_remote_prefix: prefix/
 fmi_geoid: 123456
+wg_privatekey: wg genkey
+wg_remote_publickey: wg pubkey < remote_privatekey
+wg_remote_endpoint: server:51820
+wg_ip_range: 192.168.100.100/24

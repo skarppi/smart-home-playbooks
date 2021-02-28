@@ -1,0 +1,25 @@
+- name: Add Wireguard VPN tunnel
+  hosts: all
+  vars_files: common.yml 
+  become: yes
+  tasks:
+  - ansible.builtin.get_url:
+      url: https://deb.debian.org/debian/pool/main/d/debian-archive-keyring/debian-archive-keyring_2019.1_all.deb
+      dest: /tmp/keyring.deb
+  - apt: 
+      deb: /tmp/keyring.deb
+  - ansible.builtin.apt_repository:
+      repo: deb http://deb.debian.org/debian buster-backports main
+  - ansible.builtin.shell: 'printf "Package: *\nPin: release a=buster-backports\nPin-Priority: 90\n" > /etc/apt/preferences.d/limit-backports'
+  - apt: 
+      update_cache: yes
+      pkg:
+      - wireguard
+      - raspberrypi-kernel-headers
+  - template:
+      src: "etc/wireguard/wg0-client.conf"
+      dest: /etc/wireguard/
+      owner: root
+      group: root
+  - ansible.builtin.shell: systemctl enable wg-quick@wg0-client
+  - ansible.builtin.shell: systemctl start wg-quick@wg0-client
