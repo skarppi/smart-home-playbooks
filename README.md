@@ -41,3 +41,10 @@ Basic setup of Raspberry Pi 4b.
 
 Configure Huawei E392 4G dongle. ```inet_down.sh``` script tries to fix broken internet and/or reboot in case ifup/down didn't fix the connection.
 
+##### weather.yml
+
+Setup a MQTT broker which gathers all observations from wired sensors and other devices on the local network. MQTT bridge forwards all messages to a remote server where they can be stored (InfluxDB) and visualized (Grafana).
+
+Raspberry Pi is wired with BME280 temperature, humidity and pressure sensor. The sensor is read once per minute ```bme280mqtt.py``` and values are sent in a MQTT message.
+
+Outside temperature is polled using the [FMI Open data WFS service](https://en.ilmatieteenlaitos.fi/open-data-manual).

@@ -1,2 +1,7 @@
-hostname: jpi4b
+hostname: rpi
 timezone: Europe/Helsinki
+mqtt_remote_address: bridge:8883
+mqtt_remote_username: username
+mqtt_remote_password: password
+mqtt_remote_prefix: prefix/
+fmi_geoid: 123456

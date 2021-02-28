@@ -1,0 +1,42 @@
+- name: MQTT bridge and local sensors
+  hosts: all
+  become: yes
+  vars_files: common.yml
+  tasks:
+  - ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: /home/pi/sensors/
+      owner: pi
+      group: pi
+      mode: "755"
+    with_fileglob:
+    - home/pi/sensors/*.py
+  - apt: 
+      pkg:
+      - i2c-tools
+      - python3-pip
+      - mosquitto
+      - mosquitto-clients
+  - template:
+      src: "etc/mosquitto/conf.d/default.conf"
+      dest: "/etc/mosquitto/conf.d/default.conf"
+      owner: root
+      group: root
+  - ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: yes
+      name: mosquitto
+  - ansible.builtin.pip:
+      name:
+      - RPi.bme280
+      - paho-mqtt
+  - ansible.builtin.cron:
+      name: bme280
+      minute: "*/1"
+      user: pi
+      job: "/home/pi/sensors/bme280mqtt.py >> /home/pi/sensors/bme280mqtt.log"
+  - ansible.builtin.cron:
+      name: fmi
+      minute: "*/5"
+      user: pi
+      job: "/home/pi/sensors/fmi.py {{fmi_geoid}} >> /home/pi/sensors/fmi.log"
