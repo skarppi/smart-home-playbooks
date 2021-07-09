@@ -1,0 +1,58 @@
+- name: Change wlan to ap mode
+  hosts: all
+  vars_files: common.yml 
+  become: yes
+  tasks:
+  - apt: 
+      pkg:
+      - hostapd
+      - dnsmasq
+      - ufw
+      - ntp
+  - ufw:
+      rule: allow
+      src: '{{ufw_allow_from}}'
+  - ufw:
+      rule: allow
+      src: '{{wg_ip_range}}'
+  - ufw:
+      rule: allow
+      direction: in
+      interface: eth0
+  - ufw:
+      rule: allow
+      direction: in
+      interface: wlan0
+  - ufw:
+      state: enabled
+  - ansible.builtin.blockinfile:
+      path: /etc/dhcpcd.conf
+      block: |
+        interface wlan0
+            static ip_address=192.168.200.1/24
+            nohook wpa_supplicant
+        interface eth0
+            static ip_address=192.168.201.1/24
+  - template:
+      src: etc/hostapd/hostapd.conf
+      dest: /etc/hostapd/hostapd.conf
+      owner: root
+      group: root
+  - ansible.builtin.copy:
+      src: etc/dnsmasq.d/router.conf
+      dest: /etc/dnsmasq.d/router.conf
+      owner: root
+      group: root
+  - ansible.builtin.shell: systemctl unmask hostapd
+  - ansible.builtin.shell: systemctl enable hostapd
+  - name: Use nearby NTP servers
+    ansible.builtin.replace:
+      path: /etc/ntp.conf
+      regexp: '^pool (\d).debian.pool.ntp.org iburst$'
+      replace: 'pool \1.fi.pool.ntp.org iburst'
+  - name: Restart ntp
+    ansible.builtin.systemd:
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
+      name: ntp
