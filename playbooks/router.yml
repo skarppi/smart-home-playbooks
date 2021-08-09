@@ -34,6 +34,11 @@
         interface eth0
             static ip_address={{lan_ip}}/24
   - ansible.builtin.copy:
+      src: "etc/network/interfaces.d/wlan0"
+      dest: "/etc/network/interfaces.d/"
+      owner: root
+      group: root
+  - ansible.builtin.copy:
       src: etc/dnsmasq.d/router.conf
       dest: /etc/dnsmasq.d/router.conf
       owner: root
