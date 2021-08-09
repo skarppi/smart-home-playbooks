@@ -13,7 +13,8 @@ const char* password = "{{wlan_passphrase}}";
 // MQTT
 WiFiClient espClient;
 const char* mqtt_server = "192.168.200.1";
-const char* temperature_topic = "sensors/pannu";
+const char* temperature_topic_pannu = "sensors/pannu";
+const char* temperature_topic_patteri = "sensors/patteri";
 
 PubSubClient mqttClient(espClient);
 
@@ -156,7 +157,7 @@ void loop(void) {
   celsius = (float)raw / 16.0;
 
   StaticJsonDocument<200> doc;
-  doc["id"] = "DS18B20";
+  doc["id"] = "DS18B20-" + String(addr[7]);
   doc["timestamp"] = getUTCTime();
   doc["temp"] = celsius;
 
@@ -166,7 +167,20 @@ void loop(void) {
   Serial.println(output);
 
   digitalWrite(2,HIGH); 
-  mqttClient.publish(temperature_topic, output, true);
+
+  if (doc["id"] == "DS18B20-102") {
+    mqttClient.publish(temperature_topic_pannu, output, true);
+  } else if (doc["id"] == "DS18B20-81") {
+    mqttClient.publish(temperature_topic_patteri, output, true);
+  } else {
+    Serial.print("Unknown ROM =");
+    for( i = 0; i < 8; i++) {
+      Serial.write(' ');
+      Serial.print(addr[i], HEX);
+    }
+  }
+  
+  //
   mqttClient.disconnect();
   delay(2000);
   digitalWrite(2,LOW);
