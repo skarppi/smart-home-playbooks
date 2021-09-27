@@ -58,7 +58,11 @@ but is accessible through Wireguard.
 
 #### router.yml
 
-Setup wireless access point required for wireless sensors (ESP8266 or similar).
+Share 4G internet connection to wireless devices. Could use Raspberry Pi's internal wireless (hostapd) but external routers offer better range and dual bands (ESP8266 has no 5Ghz wlan).
+
+#### eth-bridge-to-wlan.yml
+
+Share existing wireless network to wired ethernet device e.g TV.
 
 #### motion.yml
 
