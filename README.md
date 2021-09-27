@@ -64,6 +64,11 @@ Setup wireless access point required for wireless sensors (ESP8266 or similar).
 
 Add Raspberry Pi HQ Camera as a security camera with Motion Eye.
 
+#### vattenfall.yml
+
+Scrape energy consumption data from Vattenfall website daily.
+
+[Vattenfall Oma Energia](https://omaenergia.vattenfall.fi/)
 ## Arduino
 
 Sketch files below are for Wemos D1 Mini ESP8266 device. They connect to Raspberry Pi network, read measurements once per minute and send them as a MQTT message.

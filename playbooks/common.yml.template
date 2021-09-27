@@ -1,6 +1,7 @@
 hostname: rpi
 timezone: Europe/Helsinki
-mqtt_remote_address: bridge:8883
+mqtt_remote_host: bridge
+mqtt_remote_port: 8883
 mqtt_remote_username: username
 mqtt_remote_password: password
 mqtt_remote_prefix: prefix/
@@ -14,3 +15,5 @@ lan_ip: 192.168.0.1
 ufw_allow_from: 1.2.3.4
 wlan_ssid: ssid
 wlan_passphrase: password 
+vattenfall_username: 0123456
+vattenfall_password: password
