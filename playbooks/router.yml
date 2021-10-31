@@ -20,6 +20,10 @@
       interface: eth0
   - ufw:
       rule: allow
+      direction: out
+      interface: eth0
+  - ufw:
+      rule: allow
       direction: in
       src: '{{lan_ip}}/24'
   - ufw:
