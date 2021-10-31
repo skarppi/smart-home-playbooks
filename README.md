@@ -72,6 +72,11 @@ Add Raspberry Pi HQ Camera as a security camera with Motion Eye.
 
 Scrape energy consumption data from Vattenfall website daily.
 
+#### airplay.yml
+
+Airplay server.
+
+
 [Vattenfall Oma Energia](https://omaenergia.vattenfall.fi/)
 ## Arduino
 

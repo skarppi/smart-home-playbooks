@@ -1,0 +1,24 @@
+- name: Airplay server
+  hosts: rpi
+  become: yes
+  vars_files: common.yml
+  tasks:
+  - name: Install packages
+    apt:
+      pkg:
+        - shairport-sync
+  - name: Configure airport name
+    ansible.builtin.lineinfile:
+      path: /etc/shairport-sync.conf
+      regexp: '^//(\s+)name = "%H";'
+      line: '    name = "Stereo";'
+  - name: Configure alsa device
+    ansible.builtin.lineinfile:
+      path: /etc/shairport-sync.conf
+      regexp: '^//(\s+)output_device = "default";'
+      line: '    output_device = "hw:2";'
+  - name: Restart shairport
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: yes
+      name: shairport-sync
