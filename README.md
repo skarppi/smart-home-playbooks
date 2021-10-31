@@ -86,6 +86,10 @@ Sketch files below are for Wemos D1 Mini ESP8266 device. They connect to Raspber
 
 Waterproof 1-Wire DS18B20 digital temperature sensor.
 
+##### BME280
+
+For BME280 sensor, includes support for another 1-Wire DS18B20 sensor.
+
 ##### VMA342
 
-Air quality sensor combo board with CCS811 and BME280 sensors.
+The same as BME280 above but in addition has support for air quality sensor combo board (CCS811).
