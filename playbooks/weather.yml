@@ -22,6 +22,11 @@
       dest: "/etc/mosquitto/conf.d/default.conf"
       owner: root
       group: root
+    - ansible.builtin.blockinfile:
+      path: /etc/mosquitto/mosquitto.conf
+      block: |
+        listener 1883
+        allow_anonymous true
   - ansible.builtin.systemd:
       state: restarted
       daemon_reload: yes
@@ -30,6 +35,8 @@
       name:
       - RPi.bme280
       - paho-mqtt
+      - pytz
+      - python-dateutil
   - ansible.builtin.cron:
       name: bme280
       minute: "*/1"

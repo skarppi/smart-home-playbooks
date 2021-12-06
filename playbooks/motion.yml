@@ -19,10 +19,13 @@
       - python-pillow
       - tree
   - ansible.builtin.get_url:
-      url: https://github.com/Motion-Project/motion/releases/download/release-4.2.2/pi_buster_motion_4.2.2-1_armhf.deb
-      dest: /tmp/pi_buster_motion_4.2.2-1_armhf.deb
+      url:  https://github.com/Motion-Project/motion/releases/download/release-4.3.2/pi_buster_motion_4.3.2-1_armhf.deb
+      dest: /tmp/pi_buster_motion_4.3.2-1_armhf.deb
   - apt:
-      deb: /tmp/pi_buster_motion_4.2.2-1_armhf.deb
+      deb: /tmp/pi_buster_motion_4.3.2-1_armhf.deb
+  - ansible.builtin.get_url:
+      url:  wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+      dest: /tmp/get-pip.py
   - ansible.builtin.pip:
       executable: /usr/bin/pip
       name:

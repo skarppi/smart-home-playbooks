@@ -8,11 +8,15 @@ from dateutil import tz
 from http import cookiejar
 import re
 import os
+import ssl
+import certifi
+
+ssl._create_default_https_context = ssl._create_stdlib_context
 
 loginData = {
         "UserName": "{{vattenfall_username}}",
         "Password": "{{vattenfall_password}}",
-        "Configuration": "VF"
+        "Configuration": "CABPHUB"
     }
 
 dirname = os.path.dirname(__file__)
@@ -181,14 +185,17 @@ def getValidToken():
         jar.clear()
 
         token = login()
-        with open(tokenFilePath, "w") as writer:
-            writer.write(token)
-        
-        jar.save(cookieFilePath, True, True)
+        if token:
+            with open(tokenFilePath, "w") as writer:
+                writer.write(token)
+            
+            jar.save(cookieFilePath, True, True)
 
-        readDeliverySites(token)
+            readDeliverySites(token)
 
-        return token
+            return token
+        else:
+            return False
 
 def readLatestDate():
     with open(latestFilePath, "r") as reader:
