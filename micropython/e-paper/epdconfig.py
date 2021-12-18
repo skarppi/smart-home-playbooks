@@ -150,22 +150,26 @@ class JetsonNano:
 
 class MicroPython:
 
+    # Pin definition
+    RST_PIN_NO         = 26
+    DC_PIN_NO          = 27
+    CS_PIN_NO          = 15
+    BUSY_PIN_NO        = 25
+
+    SCK_PIN_NO         = 13
+    MOSI_PIN_NO        = 14
+
     def __init__(self):
         # preimport utime
         import utime  # pylint: disable=C0415, W0611
         from machine import Pin  # pylint: disable=C0415
-        self.DC_PIN = self.dc = Pin('P20')
-        self.dc.mode(Pin.OUT)
+        self.DC_PIN = Pin(self.DC_PIN_NO, Pin.OUT, value=0)
+        self.CS_PIN = Pin(self.CS_PIN_NO, Pin.OUT, value=1)
+        # self.cs.pull(Pin.PULL_UP)
 
-        self.CS_PIN = self.cs = Pin('P4')
-        self.cs.mode(Pin.OUT)
-        self.cs.pull(Pin.PULL_UP)
+        self.RST_PIN = Pin(self.RST_PIN_NO, Pin.OUT, value=0)
 
-        self.RST_PIN = self.rst = Pin('P19')
-        self.rst.mode(Pin.OUT)
-
-        self.BUSY_PIN = self.busy = Pin('P18')
-        self.busy.mode(Pin.IN)
+        self.BUSY_PIN = Pin(self.BUSY_PIN_NO, Pin.IN)
 
     def digital_write(self, pin, value):
         pin.value(value)
@@ -182,10 +186,9 @@ class MicroPython:
 
     def module_init(self):
         from machine import Pin, SPI  # pylint: disable=C0415
-        clk = Pin('P21')
-        mosi = Pin('P22')
-        self.spi = SPI(0, mode=SPI.MASTER, baudrate=20000000, polarity=0,
-                       phase=0, pins=(clk, mosi, None))
+        sck = Pin(self.SCK_PIN_NO, Pin.OUT)
+        mosi = Pin(self.MOSI_PIN_NO, Pin.OUT)
+        self.spi = SPI(2, baudrate=20000000, polarity=0, phase=0, sck=sck, mosi=mosi)
         return 0
 
     def module_exit(self):
