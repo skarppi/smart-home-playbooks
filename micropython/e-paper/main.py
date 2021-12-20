@@ -1,6 +1,7 @@
 # This is your main script.
 
 import epd3in7
+import connection
 import uasyncio as asyncio
 import time
 
@@ -67,8 +68,8 @@ async def render_loop():
         await asyncio.sleep(58)
 
 async def main():
+    asyncio.create_task(connection.start())
     full()
-    
     await render_loop()
 
 try:
