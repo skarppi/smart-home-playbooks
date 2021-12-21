@@ -163,13 +163,12 @@ class MicroPython:
         # preimport utime
         import utime  # pylint: disable=C0415, W0611
         from machine import Pin  # pylint: disable=C0415
-        self.DC_PIN = Pin(self.DC_PIN_NO, Pin.OUT, value=0)
-        self.CS_PIN = Pin(self.CS_PIN_NO, Pin.OUT, value=1)
-        # self.cs.pull(Pin.PULL_UP)
-
-        self.RST_PIN = Pin(self.RST_PIN_NO, Pin.OUT, value=0)
-
+        self.DC_PIN = Pin(self.DC_PIN_NO, Pin.OUT)
+        self.CS_PIN = Pin(self.CS_PIN_NO, Pin.OUT, Pin.PULL_UP)
+        self.RST_PIN = Pin(self.RST_PIN_NO, Pin.OUT)
         self.BUSY_PIN = Pin(self.BUSY_PIN_NO, Pin.IN)
+
+        self.spi = None
 
     def digital_write(self, pin, value):
         pin.value(value)
@@ -185,15 +184,21 @@ class MicroPython:
         utime.sleep_ms(delaytime)
 
     def module_init(self):
-        from machine import Pin, SPI  # pylint: disable=C0415
-        sck = Pin(self.SCK_PIN_NO, Pin.OUT)
-        mosi = Pin(self.MOSI_PIN_NO, Pin.OUT)
-        self.spi = SPI(2, baudrate=20000000, polarity=0, phase=0, sck=sck, mosi=mosi)
+        if self.spi is None:
+            from machine import Pin, SPI  # pylint: disable=C0415
+            sck = Pin(self.SCK_PIN_NO, Pin.OUT)
+            mosi = Pin(self.MOSI_PIN_NO, Pin.OUT)
+            self.spi = SPI(2, baudrate=32000000, polarity=0, phase=0, sck=sck, mosi=mosi)
+
         return 0
 
     def module_exit(self):
         self.spi.deinit()
+        self.spi = None
 
+        logger.debug("close 5V, Module enters 0 power consumption ...")
+        self.RST_PIN.value(0)
+        self.DC_PIN.value(0)
 
 if getattr(getattr(sys, 'implementation', None),
            'name', None) == 'micropython':
