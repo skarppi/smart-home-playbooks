@@ -9,6 +9,9 @@ config['ssl'] = True
 config['user'] = '{{mqtt_remote_username}}'
 config['password'] = '{{mqtt_remote_password}}'
 
+config['ntp'] = '1.fi.pool.ntp.org'
+config['tz'] = 2
+
 # ESP32 is assumed to have user supplied active low LED's on same pins.
 # Call with blue_led(True) to light
 

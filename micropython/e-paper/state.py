@@ -1,3 +1,4 @@
+import time
 
 latest = {
     'sensors/pannu': { 'temp': '-' }, 
@@ -8,7 +9,7 @@ latest = {
 
 def temp(sensor, decimals):
     temp = latest['sensors/{0}'.format(sensor)]['temp']
-    if type(temp) == int or float:
+    if type(temp) == int or type(temp) == float:
         if decimals == 1:
             return '{:.1f}°'.format(temp)
         if decimals == 2:
@@ -20,4 +21,5 @@ def temp(sensor, decimals):
         return '-'
 
 def timestamp():
-    return latest['harjula/sensors/pannu']['timestamp'].substring(11, 10)
+    now =  time.localtime()
+    return '{:02d}:{:02d}'.format(now[3], now[4])

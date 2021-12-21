@@ -5,6 +5,9 @@ import ujson
 
 from state import latest
 
+wifi_led(False)
+blue_led(False)
+
  # Instantiate event loop with any args before running code that uses it
 loop = asyncio.get_event_loop()
 
@@ -23,10 +26,56 @@ def sub_cb(topic, msg, retained):
     if sensor in latest:
         latest[sensor] = ujson.loads(msg)
 
+
+# ###################################################################### #
+# Set RTC localTime from UTC and apply DST offset
+# Requires import machine, utime, ntptime
+# assumes active network, otherwise will raise error whch is not currently dealt with
+# Note: dstOffset should be between -12 and +14 
+# ###################################################################### #
+def sync_time():
+    import ntptime
+    import time
+
+    print('Local time before synchronization：%s' % str(time.localtime()))
+
+    now=ntptime.time()
+    year, month, day, hour, minute, second, ms, dayinyear = time.localtime(now)
+
+    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format( year, month, day, hour, minute, second )
+    print( "Time : " , szTime )
+
+    ntptime.host = config['ntp']
+    offset = config['tz']
+
+    # Rules for Finland: DST ON: March last Sunday at 03:00 + 1h, DST OFF: October last Sunday at 04:00 - 1h
+    dstend = time.mktime((year, 10, (31 - (int(5 * year / 4 + 1)) % 7), 4, 0, 0, 0, 6, 0))
+    print(dstend)
+
+    dstbegin = time.mktime((year, 3, (31 - (int(5 * year / 4 + 4)) % 7), 3, 0, 0, 0, 6, 0))
+    print(dstbegin)
+
+    if now < dstbegin or now > dstend:
+        print( "Standard Time")
+        ntptime.NTP_DELTA = 3155673600-( offset * 3600) 
+    else:
+        print( "Daylight Time")
+        ntptime.NTP_DELTA = 3155673600-( (offset+1) * 3600)
+
+    # set the RTC to correct time 
+    ntptime.settime()
+    year, month, day, hour, minute, second, ms, dayinyear = time.localtime()
+    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format( year, month, day, hour, minute, second )
+    print( "setTime : " , szTime )
+
+    print('Local time after synchronization：%s' % str(time.localtime()))
+
 async def wifi_han(state):
     wifi_led(not state)
     if state:
         print('WiFi is up.')
+
+        sync_time()
     else:
         print('WiFi is down.')
     await asyncio.sleep(1)
