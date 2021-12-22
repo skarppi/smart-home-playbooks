@@ -297,7 +297,7 @@ class EPD:
         self.ReadBusy()   
 
 
-    def display_1Gray(self, image, full = False):
+    def display_1Gray(self, image, normal = True):
         if (image == None):
             return            
 
@@ -306,13 +306,15 @@ class EPD:
         self.send_command(0x4F)
         self.send_data([0x00, 0x00])
 
-        self.send_command(0x24)
+        if normal:
+            # write to new buffer
+            self.send_command(0x24)
+        else:
+            # write to old buffer
+            self.send_command(0x26)
         self.send_data(image)
 
-        if full:
-            self.load_lut(self.lut_1Gray_DU)
-        else:
-            self.load_lut(self.lut_1Gray_A2)
+        self.load_lut(self.lut_1Gray_A2)
         self.send_command(0x20)
         self.ReadBusy()   
         
@@ -354,5 +356,5 @@ class EPD:
         self.send_command(0X07) #deep sleep
         self.send_data(0xA5)
 
-        epdconfig.delay_ms(2000)
+    def deinit():
         epdconfig.module_exit()
