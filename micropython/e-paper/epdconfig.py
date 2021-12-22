@@ -177,7 +177,7 @@ class MicroPython:
         return pin.value()
 
     def spi_writebyte(self, data):
-        self.spi.write(bytes(c & 0xff for c in data))
+        self.spi.write(data)
 
     def delay_ms(self, delaytime):
         import utime  # pylint: disable=C0415

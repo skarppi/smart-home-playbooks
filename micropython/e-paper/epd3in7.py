@@ -54,7 +54,7 @@ class EPD:
         self.GRAY3  = GRAY3 #gray
         self.GRAY4  = GRAY4 #Blackest
 
-    lut_4Gray_GC = [
+    lut_4Gray_GC = bytearray([
         0x2A,0x06,0x15,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x28,0x06,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x20,0x06,0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -66,9 +66,9 @@ class EPD:
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x22,0x22,0x22,0x22,0x22
-    ]
+    ])
 
-    lut_1Gray_GC  = [
+    lut_1Gray_GC  = bytearray([
         0x2A,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x05,0x2A,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x2A,0x15,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -80,9 +80,9 @@ class EPD:
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x22,0x22,0x22,0x22,0x22
-    ]
+    ])
 
-    lut_1Gray_DU  = [
+    lut_1Gray_DU  = bytearray([
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x01,0x2A,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x0A,0x55,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -94,9 +94,9 @@ class EPD:
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x22,0x22,0x22,0x22,0x22
-    ]
+    ])
 
-    lut_1Gray_A2  = [
+    lut_1Gray_A2  = bytearray([
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x0A,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
         0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -108,7 +108,7 @@ class EPD:
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 
         0x22,0x22,0x22,0x22,0x22
-    ]
+    ])
         
     # Hardware reset
     def reset(self):
@@ -123,16 +123,20 @@ class EPD:
     def send_command(self, command):
         epdconfig.digital_write(self.dc_pin, 0)
         epdconfig.digital_write(self.cs_pin, 0)
-        epdconfig.spi_writebyte([command])
+        epdconfig.spi_writebyte(bytearray([command]))
         epdconfig.digital_write(self.cs_pin, 1)
-
 
     def send_data(self, data):
         epdconfig.digital_write(self.dc_pin, 1)
         epdconfig.digital_write(self.cs_pin, 0)
-        epdconfig.spi_writebyte([data])
+        if isinstance(data, bytearray):
+            epdconfig.spi_writebyte(data)
+        elif isinstance(data, list):
+            epdconfig.spi_writebyte(bytearray(data))
+        else:
+            epdconfig.spi_writebyte(bytearray([data]))
+            
         epdconfig.digital_write(self.cs_pin, 1)
-
 
     def ReadBusy(self):
         logger.debug("e-Paper busy")
@@ -158,17 +162,13 @@ class EPD:
         self.ReadBusy()
         
         self.send_command(0x01) # setting gaet number
-        self.send_data(0xDF)
-        self.send_data(0x01)
-        self.send_data(0x00)
+        self.send_data([0xDF, 0x01, 0x00])
 
         self.send_command(0x03) # set gate voltage
         self.send_data(0x00)
 
         self.send_command(0x04) # set source voltage
-        self.send_data(0x41)
-        self.send_data(0xA8)
-        self.send_data(0x32)
+        self.send_data([0x41, 0xA8, 0x32])
 
         self.send_command(0x11) # set data entry sequence
         self.send_data(0x03)
@@ -177,11 +177,7 @@ class EPD:
         self.send_data(0x03)
         
         self.send_command(0x0C) # set booster strength
-        self.send_data(0xAE)
-        self.send_data(0xC7)
-        self.send_data(0xC3)
-        self.send_data(0xC0)
-        self.send_data(0xC0)
+        self.send_data([0xAE, 0xC7, 0xC3, 0xC0, 0xC0])
 
         self.send_command(0x18) # set internal sensor on
         self.send_data(0x80)
@@ -191,42 +187,19 @@ class EPD:
         
         if(mode == 0):   #4Gray
             self.send_command(0x37) # set display option, these setting turn on previous function
-            self.send_data(0x00)
-            self.send_data(0x00)
-            self.send_data(0x00)
-            self.send_data(0x00)
-            self.send_data(0x00)  
-            self.send_data(0x00)
-            self.send_data(0x00)
-            self.send_data(0x00)
-            self.send_data(0x00)
-            self.send_data(0x00)  
+            self.send_data([0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00])
         elif(mode == 1):      #1Gray
             self.send_command(0x37) # set display option, these setting turn on previous function
-            self.send_data(0x00)     #can switch 1 gray or 4 gray
-            self.send_data(0xFF)
-            self.send_data(0xFF)
-            self.send_data(0xFF)
-            self.send_data(0xFF)  
-            self.send_data(0x4F)
-            self.send_data(0xFF)
-            self.send_data(0xFF)
-            self.send_data(0xFF)
-            self.send_data(0xFF)
+            # can switch 1 gray or 4 gray
+            self.send_data([0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x4F, 0xFF, 0xFF, 0xFF, 0xFF])
         else:
             logger.debug("There is no such mode") 
 
         self.send_command(0x44) # setting X direction start/end position of RAM
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x17)
-        self.send_data(0x01)
+        self.send_data([0x00, 0x00, 0x17, 0x01])
 
         self.send_command(0x45) # setting Y direction start/end position of RAM
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0xDF)
-        self.send_data(0x01)
+        self.send_data([0x00, 0x00, 0xDF, 0x01])
 
         self.send_command(0x22) # Display Update Control 2
         self.send_data(0xCF)
@@ -235,71 +208,7 @@ class EPD:
 
     def load_lut(self, lut):
         self.send_command(0x32)
-        for i in range(0, 105):
-            self.send_data(lut[i])
-
-
-    def getbuffer(self, image):
-        # logger.debug("bufsiz = ",int(self.width/8) * self.height)
-        buf = [0xFF] * (int(self.width/8) * self.height)
-        image_monocolor = image.convert('1')
-        imwidth, imheight = image_monocolor.size
-        pixels = image_monocolor.load()
-        # logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
-        if(imwidth == self.width and imheight == self.height):
-            logger.debug("Vertical")
-            for y in range(imheight):
-                for x in range(imwidth):
-                    # Set the bits for the column of pixels at the current position.
-                    if pixels[x, y] == 0:
-                        buf[int((x + y * self.width) / 8)] &= ~(0x80 >> (x % 8))
-        elif(imwidth == self.height and imheight == self.width):
-            logger.debug("Horizontal")
-            for y in range(imheight):
-                for x in range(imwidth):
-                    newx = y
-                    newy = self.height - x - 1
-                    if pixels[x, y] == 0:
-                        buf[int((newx + newy*self.width) / 8)] &= ~(0x80 >> (y % 8))
-        return buf
-
-
-    def getbuffer_4Gray(self, image):
-        # logger.debug("bufsiz = ",int(self.width/8) * self.height)
-        buf = [0xFF] * (int(self.width / 4) * self.height)
-        image_monocolor = image.convert('L')
-        imwidth, imheight = image_monocolor.size
-        pixels = image_monocolor.load()
-        i=0
-        # logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
-        if(imwidth == self.width and imheight == self.height):
-            logger.debug("Vertical")
-            for y in range(imheight):
-                for x in range(imwidth):
-                    # Set the bits for the column of pixels at the current position.
-                    if(pixels[x, y] == 0xC0):
-                        pixels[x, y] = 0x80
-                    elif (pixels[x, y] == 0x80):
-                        pixels[x, y] = 0x40
-                    i = i + 1
-                    if(i%4 == 0):
-                        buf[int((x + (y * self.width))/4)] = ((pixels[x-3, y]&0xc0) | (pixels[x-2, y]&0xc0)>>2 | (pixels[x-1, y]&0xc0)>>4 | (pixels[x, y]&0xc0)>>6)
-                        
-        elif(imwidth == self.height and imheight == self.width):
-            logger.debug("Horizontal")
-            for x in range(imwidth):
-                for y in range(imheight):
-                    newx = y
-                    newy = imwidth - x - 1
-                    if(pixels[x, y] == 0xC0):
-                        pixels[x, y] = 0x80
-                    elif (pixels[x, y] == 0x80):
-                        pixels[x, y] = 0x40
-                    i = i + 1
-                    if(i%4 == 0):
-                        buf[int((newx + (newy * self.width))/4)] = ((pixels[x, y-3]&0xc0) | (pixels[x, y-2]&0xc0)>>2 | (pixels[x, y-1]&0xc0)>>4 | (pixels[x, y]&0xc0)>>6) 
-        return buf
-
+        self.send_data(lut)
 
     def display_4Gray(self, image):
         if (image == None):
@@ -393,16 +302,12 @@ class EPD:
             return            
 
         self.send_command(0x4E)
-        self.send_data(0x00)
-        self.send_data(0x00)
+        self.send_data([0x00, 0x00])
         self.send_command(0x4F)
-        self.send_data(0x00)
-        self.send_data(0x00)
+        self.send_data([0x00, 0x00])
 
         self.send_command(0x24)
-        for j in range(0, self.height):
-            for i in range(0, int(self.width / 8)):
-                self.send_data(image[i + j * int(self.width / 8)])   
+        self.send_data(image)
 
         if full:
             self.load_lut(self.lut_1Gray_DU)
@@ -414,22 +319,22 @@ class EPD:
 
     def Clear(self, color, mode):
         self.send_command(0x4E)
-        self.send_data(0x00)
-        self.send_data(0x00)
+        self.send_data([0x00, 0x00])
         self.send_command(0x4F)
-        self.send_data(0x00)
-        self.send_data(0x00)
+        self.send_data([0x00, 0x00])
 
         self.send_command(0x24)
+
+        buf = bytearray([0xff] * int(self.width / 8))
+        
         for j in range(0, self.height):
-            for i in range(0, int(self.width / 8)):
-                self.send_data(0xff)   
+            self.send_data(buf)
 
         if(mode == 0):              #4Gray
             self.send_command(0x26)
+            
             for j in range(0, self.height):
-                for i in range(0, int(self.width / 8)):
-                    self.send_data(0xff) 
+                self.send_data(buf)
             self.load_lut(self.lut_4Gray_GC)
             self.send_command(0x22)
             self.send_data(0xC7)
