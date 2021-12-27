@@ -9,11 +9,11 @@ from fb import Canvas
 from fonts import sfpro30, sfpro50, font10
 from state import temp, timestamp
 
-fb = Canvas(epd3in7.EPD_WIDTH, epd3in7.EPD_HEIGHT)
-epd = epd3in7.EPD()
+epd = epd3in7.EPD(180)
+fb = Canvas(epd.width, epd.height, epd.rotation)
 
-w = epd3in7.EPD_WIDTH
-h = epd3in7.EPD_HEIGHT
+w = epd.width
+h = epd.height
 
 def clear():
     start = time.time()
@@ -54,6 +54,8 @@ def partial():
     # Wake up the screen from sleep
     epd.reset()
 
+    start = time.time()
+
     # Deep sleep forgets the previous buffer and partial refresh cannot know changes. Put back the old state.
     epd.display_1Gray(fb.render(), False)
 
@@ -73,6 +75,8 @@ def partial():
     fb.text_center(temp('pannu', 1), 360, sfpro50)
 
     epd.display_1Gray(fb.render())
+
+    print('render in {0} seconds'.format(time.time() - start))
 
     epd.sleep()
     

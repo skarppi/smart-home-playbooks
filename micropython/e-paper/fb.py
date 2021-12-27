@@ -15,16 +15,20 @@ class DummyDisplay(framebuf.FrameBuffer):
 
 class Canvas:
 
-    def __init__(self, EPD_WIDTH, EPD_HEIGHT):
-        self.EPD_WIDTH = EPD_WIDTH
-        self.EPD_HEIGHT = EPD_HEIGHT
-        self.width = self.EPD_WIDTH
-        self.height = self.EPD_HEIGHT
+    def __init__(self, EPD_WIDTH, EPD_HEIGHT, rotation):
+        self.width = EPD_WIDTH
+        self.height = EPD_HEIGHT
 
         gc.collect()  # Precaution before instantiating framebuf
 
         self.buf = bytearray(EPD_WIDTH * EPD_HEIGHT // 8)
-        self.fb = DummyDisplay(self.buf, EPD_WIDTH, EPD_HEIGHT, framebuf.MONO_HLSB)
+
+        if rotation == 0 or rotation == 180:
+            format = framebuf.MONO_HLSB
+        elif rotation == 90 or rotation == 270:
+            format = framebuf.MONO_VLSB
+
+        self.fb = DummyDisplay(self.buf, EPD_WIDTH, EPD_HEIGHT, format)
 
         self.clear()
 
@@ -46,7 +50,7 @@ class Canvas:
         wri = writer.Writer(self.fb, font, False)
         
         len = wri.stringlen(str)
-        x = (self.EPD_WIDTH - len) // 2
+        x = (self.width - len) // 2
 
         writer.Writer.set_textpos(self.fb, y, x)
         wri.printstring(str, True)

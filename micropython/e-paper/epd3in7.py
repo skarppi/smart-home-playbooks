@@ -29,6 +29,7 @@
 
 import logging
 import epdconfig
+from ustruct import pack
 
 # Display resolution
 EPD_WIDTH       = 280
@@ -42,13 +43,24 @@ GRAY4  = 0x00 #black
 logger = logging.getLogger(__name__)
 
 class EPD:
-    def __init__(self):
+    
+
+    def __init__(self, rotation):
         self.reset_pin = epdconfig.RST_PIN
         self.dc_pin = epdconfig.DC_PIN
         self.busy_pin = epdconfig.BUSY_PIN
         self.cs_pin = epdconfig.CS_PIN
-        self.width = EPD_WIDTH
-        self.height = EPD_HEIGHT
+
+        self.rotation = rotation
+        if rotation == 0 or rotation == 180:
+            self.width = EPD_WIDTH
+            self.height = EPD_HEIGHT
+        elif rotation == 90 or rotation == 270:
+            self.width = EPD_HEIGHT
+            self.height = EPD_WIDTH
+        else:
+            raise ValueError(f"Incorrect rotation selected ({rotation}). Valid values: 0, 90, 180 and 270.")
+
         self.GRAY1  = GRAY1 #white
         self.GRAY2  = GRAY2
         self.GRAY3  = GRAY3 #gray
@@ -119,6 +131,11 @@ class EPD:
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200)   
 
+    def reverse_bits(self, num, bits=8):
+        result = 0
+        for i in range(bits):
+            result = (result << 1) | ((num >> i) & 1)
+        return result
 
     def send_command(self, command):
         epdconfig.digital_write(self.dc_pin, 0)
@@ -129,7 +146,7 @@ class EPD:
     def send_data(self, data):
         epdconfig.digital_write(self.dc_pin, 1)
         epdconfig.digital_write(self.cs_pin, 0)
-        if isinstance(data, bytearray):
+        if isinstance(data, bytearray) or isinstance(data, bytes):
             epdconfig.spi_writebyte(data)
         elif isinstance(data, list):
             epdconfig.spi_writebyte(bytearray(data))
@@ -137,6 +154,58 @@ class EPD:
             epdconfig.spi_writebyte(bytearray([data]))
             
         epdconfig.digital_write(self.cs_pin, 1)
+
+    def set_cursor(self):
+        if self.rotation == 0:
+            x = 0
+            y = 0
+        elif self.rotation == 180:
+            x = self.width - 1
+            y = self.height - 1
+        elif self.rotation == 90:
+            x = self.height - 1
+            y = 0
+        elif self.rotation == 270:
+            x = 0
+            y = self.width - 1
+        else:
+            raise ValueError(f"Incorrect rotation selected")
+
+        self.send_command(0x4E)
+        self.send_data(pack("h", x))
+
+        self.send_command(0x4F)
+        self.send_data(pack("h", y))
+
+    def set_window(self):
+        if self.rotation == 0:
+            start_x = 0
+            end_x = self.width - 1
+            start_y = 0
+            end_y = self.height - 1
+        elif self.rotation == 180:
+            start_x = self.width - 1
+            end_x = 0
+            start_y = self.height - 1
+            end_y = 0
+        elif self.rotation == 90:
+            start_x = self.height - 1
+            end_x = 0
+            start_y = 0
+            end_y = self.width - 1
+        elif self.rotation == 270:
+            start_x = 0
+            end_x = self.height - 1
+            start_y = self.width - 1
+            end_y = 0
+        else:
+            raise ValueError(f"Incorrect rotation selected")
+
+        self.send_command(0x44) # setting X direction start/end position of RAM
+        self.send_data(pack("2h", start_x, end_x))
+
+        self.send_command(0x45) # setting Y direction start/end position of RAM
+        self.send_data(pack("2h", start_y, end_y))
 
     def ReadBusy(self):
         logger.debug("e-Paper busy")
@@ -171,7 +240,16 @@ class EPD:
         self.send_data([0x41, 0xA8, 0x32])
 
         self.send_command(0x11) # set data entry sequence
-        self.send_data(0x03)
+        if self.rotation == 0:
+            self.send_data(0x03)
+        elif self.rotation == 180:
+            self.send_data(0x00)
+        elif self.rotation == 90:
+            self.send_data(0x06)
+        elif self.rotation == 270:
+            self.send_data(0x05)
+        else:
+            raise ValueError(f"Incorrect rotation selected")
 
         self.send_command(0x3C) # set border 
         self.send_data(0x03)
@@ -195,11 +273,7 @@ class EPD:
         else:
             logger.debug("There is no such mode") 
 
-        self.send_command(0x44) # setting X direction start/end position of RAM
-        self.send_data([0x00, 0x00, 0x17, 0x01])
-
-        self.send_command(0x45) # setting Y direction start/end position of RAM
-        self.send_data([0x00, 0x00, 0xDF, 0x01])
+        self.set_window()
 
         self.send_command(0x22) # Display Update Control 2
         self.send_data(0xCF)
@@ -301,10 +375,7 @@ class EPD:
         if (image == None):
             return            
 
-        self.send_command(0x4E)
-        self.send_data([0x00, 0x00])
-        self.send_command(0x4F)
-        self.send_data([0x00, 0x00])
+        self.set_cursor()
 
         if normal:
             # write to new buffer
@@ -312,7 +383,19 @@ class EPD:
         else:
             # write to old buffer
             self.send_command(0x26)
-        self.send_data(image)
+
+        if self.rotation == 0 or self.rotation == 180:
+            self.send_data(image)
+        else:
+            # send one row at a time to save memory but keep performance good enough
+            buf = bytearray([0xff] * int(self.width / 8))
+            for row in range(0, self.height):
+                for col in range(0, self.width):
+                    # print(row, col)
+                    buf[col // 8] = self.reverse_bits(image[(row * self.width + col) // 8])
+    
+                self.send_data(buf)
+                # self.send_data(bytes([self.reverse_bits(i)]))
 
         self.load_lut(self.lut_1Gray_A2)
         self.send_command(0x20)
@@ -320,10 +403,8 @@ class EPD:
         
 
     def Clear(self, color, mode):
-        self.send_command(0x4E)
-        self.send_data([0x00, 0x00])
-        self.send_command(0x4F)
-        self.send_data([0x00, 0x00])
+        
+        self.set_cursor()
 
         self.send_command(0x24)
 
