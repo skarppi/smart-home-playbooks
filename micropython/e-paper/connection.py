@@ -3,7 +3,7 @@ from config import wifi_led, blue_led
 import uasyncio as asyncio
 import ujson
 
-from state import latest
+from state import latest, history
 
 wifi_led(False)
 blue_led(False)
@@ -23,8 +23,15 @@ def sub_cb(topic, msg, retained):
     print((sensor, msg, retained))
     loop.create_task(heartbeat())
 
+    json = ujson.loads(msg)
+
     if sensor in latest:
-        latest[sensor] = ujson.loads(msg)
+        latest[sensor] = json
+
+    if sensor in history:
+        history[sensor].append(json)
+        if len(history[sensor]) > 15:
+            del history[sensor][0]
 
 
 # ###################################################################### #
@@ -74,6 +81,13 @@ async def wifi_han(state):
     wifi_led(not state)
     if state:
         print('WiFi is up.')
+
+        import network
+        wlan = network.WLAN(network.STA_IF)
+        print(wlan.ifconfig())
+
+        import webrepl
+        webrepl.start()
 
         sync_time()
     else:

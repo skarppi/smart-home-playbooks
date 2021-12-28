@@ -1,5 +1,9 @@
 import time
 
+history = {
+    'sensors/pannu': [], 
+}
+
 latest = {
     'sensors/pannu': { 'temp': '-' }, 
     'sensors/indoor': { 'temp': '-' }, 
@@ -9,17 +13,25 @@ latest = {
 
 def temp(sensor, decimals):
     temp = latest['sensors/{0}'.format(sensor)]['temp']
-    if type(temp) == int or type(temp) == float:
+    return format(temp, decimals)
+
+def format(value, decimals):
+    if type(value) == int or type(value) == float:
         if decimals == 1:
-            return '{:.1f}°'.format(temp)
+            return '{:.1f}°'.format(value)
         if decimals == 2:
-            return '{:.2f}°'.format(temp)
-        if decimals == 3:
-            return '{:.3f}°'.format(temp)
-        return '{0}°'.format(temp)
+            return '{:.2f}°'.format(value)
+        return '{0}°'.format(value)
     else:
         return '-'
 
 def timestamp():
     now =  time.localtime()
     return '{:02d}:{:02d}'.format(now[3], now[4])
+
+def temp_history(sensor):
+    values = []
+    for data in history['sensors/{0}'.format(sensor)]:
+        if type(data['temp']) == int or type(data['temp']) == float:
+            values.append(data['temp'])
+    return values

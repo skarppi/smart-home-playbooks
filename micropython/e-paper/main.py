@@ -7,9 +7,9 @@ import time
 
 from fb import Canvas
 from fonts import sfpro30, sfpro50, font10
-from state import temp, timestamp
+from state import temp, timestamp, temp_history, format
 
-epd = epd3in7.EPD(180)
+epd = epd3in7.EPD(0)
 fb = Canvas(epd.width, epd.height, epd.rotation)
 
 w = epd.width
@@ -74,12 +74,45 @@ def partial():
     fb.clear(30, 360, w - 60, 50)
     fb.text_center(temp('pannu', 1), 360, sfpro50)
 
+    fb.clear(20, 420, w - 40, 50)
+    graph(temp_history('pannu'), 20, 420, w - 40, 50)
+
     epd.display_1Gray(fb.render())
 
     print('render in {0} seconds'.format(time.time() - start))
 
     epd.sleep()
     
+def graph(data, x, y, w, h):
+    items = len(data)
+    if items < 2:
+        return
+
+    width_per_point = (w - 50)  // (items - 1)
+
+    max_y = max(data)
+    fb.text('{:.1f}'.format(max_y), x, y, font10)
+
+    min_y = min(data)
+    fb.text('{:.1f}'.format(min_y), x, y + h - 10, font10)
+
+    range = max_y - min_y
+
+    y_multiplier = 1
+    if range > 0:
+        y_multiplier = h / range
+
+    for i in range(1, items):
+        x_previous = x + 50 + width_per_point * (i - 1)
+        x_current = x + 50 + width_per_point * i
+
+        y_previous = y + int((max_y - data[i - 1]) * y_multiplier)
+        y_current = y + int((max_y - data[i]) * y_multiplier)
+
+        fb.line(x_previous, y_previous, x_current, y_current)
+        fb.line(x_previous, y_previous - 1, x_current, y_current - 1)
+
+
 async def main():
     asyncio.create_task(connection.start())
     full()
