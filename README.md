@@ -1,6 +1,8 @@
-# Raspberry Pi Playbooks
+# Smart home playbooks
 
-Collection of Ansible and Arduino scripts for setting up Raspberry Pi as a weather, security, and home automation hub.
+Collection of scripts for setting up home automation sensors, monitoring and control devices. 
+Raspberry Pi acts as a hub and collects sensor data from numerous wireless ESP8266/ESP32 devices. 
+Raspberry Pi has 4G connectivity and MQTT bridge forwards all collected messages to a remote server where they can be stored (InfluxDB) and visualized (Grafana).
 
 # Components
 
@@ -12,7 +14,7 @@ Find out the correct IP address e.g. using ```arp -a``` command on a Mac and ssh
 
 [More about setting up headless Raspberry Pi](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md)
 
-## Playbooks
+## Ansible Playbooks for setting up Raspberry Pi
 
 ```
 pip3 install ansible
@@ -43,7 +45,7 @@ Configure Huawei E392 4G dongle. ```inet_down.sh``` script tries to fix broken i
 
 ##### weather.yml
 
-Setup a MQTT broker which gathers all observations from wired sensors and other devices on the local network. MQTT bridge forwards all messages to a remote server where they can be stored (InfluxDB) and visualized (Grafana).
+Setup a MQTT broker which gathers observations from connected sensors and other wireless devices on the local network. 
 
 Raspberry Pi is wired with BME280 temperature, humidity and pressure sensor. The sensor is read once per minute ```bme280mqtt.py``` and values are sent in a MQTT message.
 
@@ -51,8 +53,8 @@ Outside temperature is polled using the [FMI Open data WFS service](https://en.i
 
 ##### wireguard.yml
 
-Establish Wireguard VPN tunnel to remote server. Raspberry Pi has no open ports to the world
-but is accessible through Wireguard.
+Establish Wireguard VPN tunnel to a remote server. Raspberry Pi has no open ports to the world
+but is accessible through Wireguard tunnel from the remote server.
 
 [WireGuard Site-to-Site](https://gist.github.com/insdavm/b1034635ab23b8839bf957aa406b5e39).
 
@@ -70,26 +72,32 @@ Add Raspberry Pi HQ Camera as a security camera with Motion Eye.
 
 #### vattenfall.yml
 
-Scrape energy consumption data from Vattenfall website daily.
+Scrape energy consumption data from [Vattenfall Oma Energia](https://omaenergia.vattenfall.fi/) daily.
 
 #### airplay.yml
 
-Airplay server.
+Airplay server. Can use Raspberrys audio-out jack or USB dac.
 
-
-[Vattenfall Oma Energia](https://omaenergia.vattenfall.fi/)
 ## Arduino
 
 Sketch files below are for Wemos D1 Mini ESP8266 device. They connect to Raspberry Pi network, read measurements once per minute and send them as a MQTT message.
 
-##### DS18B20
+##### Central heating control and monitor
 
-Waterproof 1-Wire DS18B20 digital temperature sensor.
+[Waveshare MG996R Servo](https://www.waveshare.com/product/modules/motors-servos/mg996r-servo.htm) linked to temperature knob of central heating unit. Two waterproof 1-Wire DS18B20 digital temperature sensors reading outbound and inbound temperatures.
 
-##### BME280
+##### Outside and inside temperature sensors
 
-For BME280 sensor, includes support for another 1-Wire DS18B20 sensor.
+BME280 sensor for indoor temperature and includes support for another 1-Wire DS18B20 sensor for outdoor reading.
 
 ##### VMA342
 
 The same as BME280 above but in addition has support for air quality sensor combo board (CCS811).
+
+## Micropython
+
+Tested on ESP32 devices only.
+
+#### e-paper
+
+ESP32 device with connected E-paper display shows latest temperature measurements.

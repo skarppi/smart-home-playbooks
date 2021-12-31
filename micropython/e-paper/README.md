@@ -15,4 +15,4 @@ It's quite easy to copy the changes over another display driver. The UI also nee
 
 Subscribes to MQTT topics and refresh display periodically.
 
-![screenshot](https://github.com/skarppi/smart-home/raw/master/micropython/e-paper/screenshot.jpg "Screenshot")
+![screenshot](https://github.com/skarppi/smart-home-playbooks/raw/main/micropython/e-paper/screenshot.jpeg "Screenshot")
