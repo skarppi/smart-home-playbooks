@@ -2,6 +2,7 @@
 
 import epd3in7
 import connection
+import sensors
 import uasyncio as asyncio
 import time
 
@@ -115,6 +116,7 @@ def graph(data, x, y, w, h):
 
 async def main():
     asyncio.create_task(connection.start())
+    asyncio.create_task(sensors.start())
     full()
 
     while True:

@@ -121,5 +121,8 @@ async def start():
     while True:
         await asyncio.sleep(5)
 
+async def publish(topic, msg):
+    await client.publish(topic,  ujson.dumps(msg), qos = 1)
+
 def close():
     client.close()
