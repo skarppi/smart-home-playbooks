@@ -8,6 +8,7 @@ latest = {
     'sensors/pannu': { 'temp': '-' }, 
     'sensors/pannu/command': '-', 
     'sensors/indoor': { 'temp': '-' }, 
+    'sensors/indoor/refreshrate': 1, 
     'sensors/vintti': { 'temp': '-' }, 
     'sensors/takapiha': { 'temp': '-' }, 
 }

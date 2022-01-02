@@ -122,7 +122,7 @@ async def main():
 
     while True:
         partial()
-        await asyncio.sleep(60)
+        await asyncio.sleep(raw('indoor/refreshrate') * 60)
 
 try:
     asyncio.run(main())
