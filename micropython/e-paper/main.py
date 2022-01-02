@@ -8,7 +8,7 @@ import time
 
 from fb import Canvas
 from fonts import sfpro30, sfpro50, font10
-from state import temp, timestamp, temp_history, format
+from state import temp, timestamp, temp_history, raw
 
 epd = epd3in7.EPD(0)
 fb = Canvas(epd.width, epd.height, epd.rotation)
@@ -74,6 +74,7 @@ def partial():
 
     fb.clear(30, 360, w - 60, 50)
     fb.text_center(temp('pannu', 1), 360, sfpro50)
+    fb.text('/ {0}'.format(raw('pannu/command')), w - 50, 400, font10)
 
     fb.clear(20, 420, w - 40, 50)
     graph(temp_history('pannu'), 20, 420, w - 40, 50)

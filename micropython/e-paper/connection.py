@@ -8,28 +8,21 @@ from state import latest, history
 wifi_led(False)
 blue_led(False)
 
- # Instantiate event loop with any args before running code that uses it
-loop = asyncio.get_event_loop()
-
-# Demonstrate scheduler is operational.
-async def heartbeat():
-    blue_led(True)
-    await asyncio.sleep(1)
-    blue_led(False)
-
 def sub_cb(topic, msg, retained):
     sensor = topic.decode()
 
     print((sensor, msg, retained))
-    loop.create_task(heartbeat())
 
-    json = ujson.loads(msg)
+    if type(msg) == int or type(msg) == float:
+        data = msg
+    else:
+        data = ujson.loads(msg)
 
     if sensor in latest:
-        latest[sensor] = json
+        latest[sensor] = data
 
     if sensor in history:
-        history[sensor].append(json)
+        history[sensor].append(data)
         if len(history[sensor]) > 15:
             del history[sensor][0]
 

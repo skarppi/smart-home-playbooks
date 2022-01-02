@@ -6,14 +6,17 @@ history = {
 
 latest = {
     'sensors/pannu': { 'temp': '-' }, 
+    'sensors/pannu/command': '-', 
     'sensors/indoor': { 'temp': '-' }, 
     'sensors/vintti': { 'temp': '-' }, 
     'sensors/takapiha': { 'temp': '-' }, 
 }
 
+def raw(sensor):
+    return latest['sensors/{0}'.format(sensor)]
+
 def temp(sensor, decimals):
-    temp = latest['sensors/{0}'.format(sensor)]['temp']
-    return format(temp, decimals)
+    return format(raw(sensor)['temp'], decimals)
 
 def format(value, decimals):
     if type(value) == int or type(value) == float:
