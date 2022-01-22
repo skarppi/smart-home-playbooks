@@ -18,6 +18,7 @@
       - libz-dev
       - python-pillow
       - tree
+      - nginx
   - ansible.builtin.get_url:
       url:  https://github.com/Motion-Project/motion/releases/download/release-4.3.2/pi_buster_motion_4.3.2-1_armhf.deb
       dest: /tmp/pi_buster_motion_4.3.2-1_armhf.deb
@@ -51,3 +52,11 @@
   - ansible.builtin.shell: systemctl daemon-reload
   - ansible.builtin.shell: systemctl enable motioneye
   - ansible.builtin.shell: systemctl start motioneye
+
+  - ansible.builtin.copy:
+      src: "etc/nginx/sites-available/motioneye.conf"
+      dest: "/etc/nginx/sites-available/motioneye.conf"
+      owner: root
+      group: root
+  - ansible.builtin.shell: systemctl enable nginx
+  - ansible.builtin.shell: systemctl start nginx
