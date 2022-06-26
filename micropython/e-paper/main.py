@@ -16,6 +16,23 @@ fb = Canvas(epd.width, epd.height, epd.rotation)
 w = epd.width
 h = epd.height
 
+winter = False
+
+if winter:
+    top = 120
+    top_graph = False
+    middle = 240
+    middle_graph = False
+    bottom = 360
+    bottom_graph = True
+else:
+    top = 120
+    top_graph = True
+    middle = 280
+    middle_graph = True
+    bottom = 420
+    bottom_graph = False
+
 
 def clear():
     start = time.time()
@@ -40,16 +57,17 @@ def full():
     fb.line(w - 10, 125, w - 10, h - 10)
 
     # upstairs
-    fb.text_center('Ylakerta', 100, font10)
-    fb.line(10, 200, w - 10, 200)
+    fb.text_center('Ylakerta', top - 20, font10)
+    #divider = top + 25 + (middle - top) / 2
+    divider(top + 25 + (middle - top) / 2)
 
     # downstairs
-    fb.text_center('Alakerta', 220, font10)
-    fb.line(10, 320, w - 10, 320)
+    fb.text_center('Alakerta', middle - 20, font10)
+    divider(middle + 25 + (bottom - middle) / 2)
 
     # cellar
-    fb.text_center('Patteri', 340, font10)
-    fb.line(10, h - 10, w - 10, h - 10)
+    fb.text_center('Patteri', bottom - 20, font10)
+    divider(h - 10)
 
     epd.display_1Gray(fb.render())
 
@@ -69,24 +87,35 @@ def partial():
     fb.clear(w - 140, 20, 140, 40)
     fb.text(timestamp(), w - 140, 20, sfpro40)
 
-    fb.clear(30, 120, w - 60, 50)
-    fb.text_center(temp('vintti', 1), 120, sfpro50)
+    fb.clear(30, top, w - 60, 50)
+    fb.text_center(temp('vintti', 1), top, sfpro50)
+    if top_graph:
+        fb.clear(20, top + 60, w - 40, 50)
+        graph(temp_history('vintti'), 20, top + 60, w - 40, 50)
 
-    fb.clear(30, 240, w - 60, 50)
-    fb.text_center(temp('indoor', 1), 240, sfpro50)
+    fb.clear(30, middle, w - 60, 50)
+    fb.text_center(temp('indoor', 1), middle, sfpro50)
+    if middle_graph:
+        fb.clear(20, middle + 60, w - 40, 50)
+        graph(temp_history('indoor'), 20, middle + 60, w - 40, 50)
 
-    fb.clear(30, 360, w - 60, 50)
-    fb.text_center(temp('pannu', 1), 360, sfpro50)
+    fb.clear(30, bottom, w - 60, 50)
+    fb.text_center(temp('pannu', 1), bottom, sfpro50)
     fb.text('/ {0}'.format(raw('pannu/command')), w - 50, 400, font10)
 
-    fb.clear(20, 420, w - 40, 50)
-    graph(temp_history('pannu'), 20, 420, w - 40, 50)
+    if bottom_graph:
+        fb.clear(20, bottom + 60, w - 40, 50)
+        graph(temp_history('pannu'), 20, bottom + 60, w - 40, 50)
 
     epd.display_1Gray(fb.render())
 
     print('render in {0} seconds'.format(time.time() - start))
 
     epd.sleep()
+
+
+def divider(y):
+    fb.line(10, int(y), w - 10, int(y))
 
 
 def graph(data, x, y, w, h):
@@ -100,7 +129,7 @@ def graph(data, x, y, w, h):
     fb.text('{:.1f}'.format(max_y), x, y, font10)
 
     min_y = min(data)
-    fb.text('{:.1f}'.format(min_y), x, y + h - 10, font10)
+    fb.text('{:.1f}'.format(min_y), x, y + h - 11, font10)
 
     range = max_y - min_y
 

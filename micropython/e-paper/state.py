@@ -2,6 +2,8 @@ import time
 from mqtt_as import config
 
 history = {
+    'sensors/vintti': [],
+    'sensors/indoor': [],
     'sensors/pannu': [],
 }
 
