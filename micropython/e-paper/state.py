@@ -48,7 +48,7 @@ def timestamp():
     stdtime = now < dstbegin or now > dstend
     local_hour = hour + config['tz'] + (0 if stdtime else 1)
 
-    return '{:02d}:{:02d}'.format(local_hour % 24, minute)
+    return '{:02d}.{:02d}'.format(local_hour % 24, minute)
 
 
 def temp_history(sensor):

@@ -7,7 +7,7 @@ import uasyncio as asyncio
 import time
 
 from fb import Canvas
-from fonts import sfpro30, sfpro50, font10
+from fonts import sfpro40, sfpro50, font10
 from state import temp, timestamp, temp_history, raw
 
 epd = epd3in7.EPD(0)
@@ -16,11 +16,13 @@ fb = Canvas(epd.width, epd.height, epd.rotation)
 w = epd.width
 h = epd.height
 
+
 def clear():
     start = time.time()
     epd.init(0)
     epd.Clear(0xFF, 0)
     print('clear in {0} seconds'.format(time.time() - start))
+
 
 def full():
     clear()
@@ -29,11 +31,11 @@ def full():
     fb.text('Ulkona', 10, 0, font10)
 
     # time
-    fb.text('Kello', w - 100, 0, font10)
+    fb.text('Kello', w - 140, 0, font10)
 
     # roof
-    fb.line(10, 125, w // 2, 50)
-    fb.line(w // 2, 50, w - 10, 125)
+    fb.line(10, 125, w // 2, 70)
+    fb.line(w // 2, 70, w - 10, 125)
     fb.line(10, 125, 10, h - 10)
     fb.line(w - 10, 125, w - 10, h - 10)
 
@@ -51,6 +53,7 @@ def full():
 
     epd.display_1Gray(fb.render())
 
+
 def partial():
     # Wake up the screen from sleep
     epd.reset()
@@ -60,11 +63,11 @@ def partial():
     # Deep sleep forgets the previous buffer and partial refresh cannot know changes. Put back the old state.
     epd.display_1Gray(fb.render(), False)
 
-    fb.clear(10, 20, w // 2 - 50, 40)
-    fb.text(temp('takapiha', 1), 10, 20, sfpro30)
+    fb.clear(10, 20, w // 2 - 30, 40)
+    fb.text(temp('takapiha', 1), 10, 20, sfpro40)
 
-    fb.clear(w - 100, 20, 80, 40)
-    fb.text(timestamp(), w - 100, 20, sfpro30)
+    fb.clear(w - 140, 20, 140, 40)
+    fb.text(timestamp(), w - 140, 20, sfpro40)
 
     fb.clear(30, 120, w - 60, 50)
     fb.text_center(temp('vintti', 1), 120, sfpro50)
@@ -84,13 +87,14 @@ def partial():
     print('render in {0} seconds'.format(time.time() - start))
 
     epd.sleep()
-    
+
+
 def graph(data, x, y, w, h):
     items = len(data)
     if items < 2:
         return
 
-    width_per_point = (w - 50)  // (items - 1)
+    width_per_point = (w - 50) // (items - 1)
 
     max_y = max(data)
     fb.text('{:.1f}'.format(max_y), x, y, font10)
