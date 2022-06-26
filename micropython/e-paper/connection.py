@@ -8,6 +8,7 @@ from state import latest, history
 wifi_led(False)
 blue_led(False)
 
+
 def sub_cb(topic, msg, retained):
     sensor = topic.decode()
 
@@ -31,44 +32,33 @@ def sub_cb(topic, msg, retained):
 # Set RTC localTime from UTC and apply DST offset
 # Requires import machine, utime, ntptime
 # assumes active network, otherwise will raise error whch is not currently dealt with
-# Note: dstOffset should be between -12 and +14 
+# Note: dstOffset should be between -12 and +14
 # ###################################################################### #
 def sync_time():
     import ntptime
     import time
 
-    print('Local time before synchronization：%s' % str(time.localtime()))
+    print('Time before synchronization：%s' % str(time.gmtime()))
 
-    now=ntptime.time()
-    year, month, day, hour, minute, second, ms, dayinyear = time.localtime(now)
+    now = ntptime.time()
+    year, month, day, hour, minute, second, ms, dayinyear = time.gmtime(now)
 
-    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format( year, month, day, hour, minute, second )
-    print( "Time : " , szTime )
+    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format(
+        year, month, day, hour, minute, second)
+    print("Time : ", szTime)
 
     ntptime.host = config['ntp']
-    offset = config['tz']
 
-    # Rules for Finland: DST ON: March last Sunday at 03:00 + 1h, DST OFF: October last Sunday at 04:00 - 1h
-    dstend = time.mktime((year, 10, (31 - (int(5 * year / 4 + 1)) % 7), 4, 0, 0, 0, 6, 0))
-    print(dstend)
-
-    dstbegin = time.mktime((year, 3, (31 - (int(5 * year / 4 + 4)) % 7), 3, 0, 0, 0, 6, 0))
-    print(dstbegin)
-
-    if now < dstbegin or now > dstend:
-        print( "Standard Time")
-        ntptime.NTP_DELTA = 3155673600-( offset * 3600) 
-    else:
-        print( "Daylight Time")
-        ntptime.NTP_DELTA = 3155673600-( (offset+1) * 3600)
-
-    # set the RTC to correct time 
+    # set the RTC to correct time
     ntptime.settime()
-    year, month, day, hour, minute, second, ms, dayinyear = time.localtime()
-    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format( year, month, day, hour, minute, second )
-    print( "setTime : " , szTime )
 
-    print('Local time after synchronization：%s' % str(time.localtime()))
+    year, month, day, hour, minute, second, ms, dayinyear = time.gmtime()
+    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format(
+        year, month, day, hour, minute, second)
+    print("setTime : ", szTime)
+
+    print('Time after synchronization：%s' % str(time.gmtime()))
+
 
 async def wifi_han(state):
     wifi_led(not state)
@@ -87,6 +77,7 @@ async def wifi_han(state):
         print('WiFi is down.')
     await asyncio.sleep(1)
 
+
 async def conn_han(client):
     await client.subscribe('sensors/#', 1)
 
@@ -103,6 +94,7 @@ config['clean'] = True
 MQTTClient.DEBUG = True  # Optional
 client = MQTTClient(config)
 
+
 async def start():
     try:
         print('Connecting...')
@@ -110,12 +102,14 @@ async def start():
     except OSError:
         print('Connection failed.')
         return
-    
+
     while True:
         await asyncio.sleep(5)
 
+
 async def publish(topic, msg):
-    await client.publish(topic,  ujson.dumps(msg), qos = 1)
+    await client.publish(topic,  ujson.dumps(msg), qos=1)
+
 
 def close():
     client.close()
