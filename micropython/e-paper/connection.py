@@ -38,47 +38,46 @@ def sync_time():
     import ntptime
     import time
 
-    print('Time before synchronization：%s' % str(time.gmtime()))
-
-    now = ntptime.time()
-    year, month, day, hour, minute, second, ms, dayinyear = time.gmtime(now)
-
-    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format(
-        year, month, day, hour, minute, second)
-    print("Time : ", szTime)
+    print('Time before synchronization %s' % str(time.gmtime()))
 
     ntptime.host = config['ntp']
 
     # set the RTC to correct time
-    ntptime.settime()
+    try:
+        ntptime.settime()
+    except Exception as e:
+        print("ntptime.settime() failure:", e)
+        return False
 
-    year, month, day, hour, minute, second, ms, dayinyear = time.gmtime()
-    szTime = "{:4}-{:02}-{:02} {:02}:{:02}:{:02}".format(
-        year, month, day, hour, minute, second)
-    print("setTime : ", szTime)
+    print('Time after synchronization %s' % str(time.gmtime()))
 
-    print('Time after synchronization：%s' % str(time.gmtime()))
+    return True
 
 
 async def wifi_han(state):
     wifi_led(not state)
     if state:
         print('WiFi is up.')
-
-        import network
-        wlan = network.WLAN(network.STA_IF)
-        print(wlan.ifconfig())
-
-        import webrepl
-        webrepl.start()
-
-        sync_time()
     else:
         print('WiFi is down.')
     await asyncio.sleep(1)
 
 
 async def conn_han(client):
+    print('Connected')
+
+    import network
+    wlan = network.WLAN(network.STA_IF)
+    print(wlan.ifconfig())
+
+    #import webrepl
+    #webrepl.start()
+
+    # even wifi is connected, our internet connection might be offline a bit longer
+    while sync_time() is False:
+        print('No time yet, waiting...')
+        await asyncio.sleep(10)
+
     await client.subscribe('sensors/#', 1)
 
 # Define configuration
@@ -96,15 +95,19 @@ client = MQTTClient(config)
 
 
 async def start():
+    import time
     try:
         print('Connecting...')
         await client.connect()
-    except OSError:
+    except:
         print('Connection failed.')
-        return
+
+    import time
 
     while True:
-        await asyncio.sleep(5)
+        print('Time synchronization：%s' % str(time.gmtime()))
+
+        await asyncio.sleep(60)
 
 
 async def publish(topic, msg):

@@ -16,7 +16,7 @@ fb = Canvas(epd.width, epd.height, epd.rotation)
 w = epd.width
 h = epd.height
 
-winter = False
+winter = True
 
 if winter:
     top = 120
